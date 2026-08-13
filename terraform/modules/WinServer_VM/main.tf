@@ -59,9 +59,9 @@ resource "proxmox_virtual_environment_vm" "winserver_vm" {
 
   boot_order = var.boot_order
 
-  timeouts {
-    create = "${var.timeout_create}s"
-  }
+#  timeouts {
+#    create = "${var.timeout_create}s"
+#  }
 
   lifecycle {
     ignore_changes = [

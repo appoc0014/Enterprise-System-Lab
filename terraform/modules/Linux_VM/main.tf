@@ -72,9 +72,9 @@ resource "proxmox_virtual_environment_vm" "ubuntu_vm" {
     }
   }
 
-  timeouts {
-    create = "${var.timeout_clone}s"
-  }
+ # timeouts {
+ #   create = "${var.timeout_clone}s"
+ # }
 
   lifecycle {
     ignore_changes = [

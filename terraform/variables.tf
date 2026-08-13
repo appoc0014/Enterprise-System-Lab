@@ -1,4 +1,4 @@
-ariable "proxmox_endpoint" {
+variable "proxmox_endpoint" {
   description = "URL of the Proxmox API, e.g. https://proxmox.example.com:8006/"
   type        = string
 }
