@@ -116,12 +116,7 @@ variable "network_vlan_id" {
 # --- Install media ---
 
 variable "install_iso_file_id" {
-  description = "Proxmox datastore file ID of the Windows Server install ISO, e.g. 'local:iso/WindowsServer2025.iso'"
-  type        = string
-}
-
-variable "unattend_iso_file_id" {
-  description = "Proxmox datastore file ID of the ISO you built containing autounattend.xml, e.g. 'local:iso/winsrv2025-unattend.iso'"
+  description = "Proxmox datastore file ID of the Windows Server install ISO, with autounattend.xml already baked into its root (bpg/proxmox only supports one cdrom device per VM, so the answer file can't be attached as a separate ISO). E.g. 'local:iso/WinServer2025-unattended.iso'"
   type        = string
 }
 

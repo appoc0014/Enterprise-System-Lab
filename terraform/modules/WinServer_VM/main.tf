@@ -45,26 +45,21 @@ resource "proxmox_virtual_environment_vm" "winserver_vm" {
     vlan_id = var.network_vlan_id
   }
 
-  # Primary CD-ROM: the Windows Server install ISO.
+  # bpg/proxmox only allows a single "cdrom" block per VM (see
+  # https://github.com/bpg/terraform-provider-proxmox/issues/718), so the
+  # answer file has to be baked into this ISO ahead of time rather than
+  # attached as a second CD-ROM. install_iso_file_id should point at a
+  # Windows install ISO that already has autounattend.xml at its root
+  # (rebuilt with oscdimg — see module README).
   cdrom {
     enabled   = true
     file_id   = var.install_iso_file_id
     interface = "ide2"
   }
 
-  # Secondary CD-ROM: the ISO you built containing autounattend.xml.
-  # Windows Setup scans all attached media at boot for an answer file
-  # named autounattend.xml at the root, so this doesn't need any special
-  # wiring beyond being present at boot.
-  cdrom {
-    enabled   = true
-    file_id   = var.unattend_iso_file_id
-    interface = "ide3"
-  }
-
   boot_order = var.boot_order
 
-  timeouts = {
+  timeouts {
     create = "${var.timeout_create}s"
   }
 

@@ -1,5 +1,5 @@
 module "ubuntu_vm" {
-  source   = "modules/Linux_VM"
+  source   = "./modules/Linux_VM"
   for_each = var.vms
 
   vm_name        = each.key
@@ -64,6 +64,6 @@ module "winserver_vm" {
   network_bridge  = each.value.network_bridge
   network_vlan_id = each.value.network_vlan_id
 
-  install_iso_file_id  = each.value.install_iso_file_id
-  unattend_iso_file_id = each.value.unattend_iso_file_id
+  install_iso_file_id = each.value.install_iso_file_id
 }
+
