@@ -28,103 +28,86 @@ variable "ssh_public_key" {
 }
 
 # Everything about each VM lives in this one map. Add/remove entries to
-# add/remove VMs — no need to touch main.tf. Field names here match the
-# module's variable names 1:1 so the module call in main.tf stays a simple
-# each.value.<field> passthrough.
+# add/remove VMs — no need to touch main.tf.
 variable "vms" {
-  description = "Map of VMs to clone. Key is the VM name, value is its configuration."
+  description = "Map of VMs to clone. Key is a short logical name, value is its configuration."
   type = map(object({
-    target_node    = string
-    vm_id          = optional(number)
-    vm_description = optional(string, "Managed by Terraform")
-    vm_cores       = optional(number, 2)
-    vm_sockets     = optional(number, 1)
-    vm_memory      = optional(number, 2048)
-    vm_tags        = optional(list(string), ["terraform"])
-
+    vm_id              = number
+    vm_name           = string
+    vm_description    = string
+    vm_cores           = number
+    vm_sockets         = number
+    vm_tags            = list(string)
+    network_vlan_id    = number
+    vm_iso             = string
+    # Network Device
+    network_model      = string
+    network_bridge     = string
+    # Memory
+    vm_memory          = number
+    # Agent
+    vm_agent_enabled   = bool
+    # Clone
+    base_vm_id         = number
+    full_clone         = bool
+    node_name          = string
     # Disk
-    vm_disk_size    = optional(number, 20)
-    vm_disk_storage = optional(string)
-
-    # Network
-    network_model   = optional(string, "virtio")
-    network_bridge  = optional(string, "vmbr0")
-    network_vlan_id = optional(number)
-
-    # Clone source
-    base_vm_id = number
-    node_name  = string
-    full_clone = optional(bool, true)
-
-    # Cloud-init
-    ci_datastore_id = optional(string, "local-lvm")
-    ci_username     = optional(string)
-    ci_ssh_keys     = optional(list(string), [])
-    ci_password     = optional(string)
-    ci_dns_domain   = optional(string)
-    ci_dns_servers  = optional(list(string))
-
-    ip_config_ipv4_address = optional(string, "dhcp")
-    ip_config_ipv4_gateway = optional(string)
-
-    timeout_clone = optional(number, 1800)
+    vm_disk_size       = number
+    #vm_disk_storage    = string
+    # Operating system
+    vm_os_type         = string
+    # Initialization settings for cloud-init
+    ci_datastore_id    = string
+    ci_dns_domain      = string
+    ci_dns_servers     = list(string)
+    ci_username        = string
+    ci_ssh_keys        = list(string)
+    ci_password        = string
   }))
 
   default = {
     web-01 = {
-      target_node    = "DellCluster2"
-      vm_id          = 211
-      vm_description = "Web server 01"
-      vm_cores       = 2
-      vm_memory      = 2048
-      vm_tags        = ["terraform", "Ubuntu"]
-
-      vm_disk_size    = 28
-      vm_disk_storage = "local-lvm"
-
-      base_vm_id = 104
-      node_name  = "DellCluster2"
-
-      ip_config_ipv4_address = "192.168.1.70/24"
-      ip_config_ipv4_gateway = "192.168.1.1"
+      vm_name            = "Ubuntu_Monitoring"  
+      node_name          = "Ubuntu_Monitoring"
+      vm_id              = 211
+      target_node        = "pve"
+      clone_source_vm_id = 104
+      cpu_cores          = 2
+      memory_dedicated   = 2048
+      disk_size          = 28
+      ip_address         = "192.168.1.70/24"
+      ip_gateway         = "192.168.1.1"
+      tags               = ["terraform", "Ubuntu"]
     }
-
     web-02 = {
-      target_node    = "DellCluster2"
-      vm_id          = 212
-      vm_description = "Web server 02"
-      vm_cores       = 2
-      vm_memory      = 2048
-      vm_tags        = ["terraform", "Ubuntu"]
-
-      vm_disk_size    = 28
-      vm_disk_storage = "local-lvm"
-
-      base_vm_id = 104
-      node_name  = "DellCluster2"
-
-      ip_config_ipv4_address = "192.168.1.71/24"
-      ip_config_ipv4_gateway = "192.168.1.1"
+      vm_name            = "Ubuntu_Apps"
+      node_name          = "Ubuntu_Apps"
+      vm_id              = 212
+      target_node        = "pve"
+      clone_source_vm_id = 104
+      cpu_cores          = 2
+      memory_dedicated   = 2048
+      disk_size          = 28
+      ip_address         = "192.168.1.71/24"
+      ip_gateway         = "192.168.1.1"
+      tags               = ["terraform", "Ubuntu"]
     }
-
     db-01 = {
-      target_node    = "DellCluster2"
-      vm_id          = 213
-      vm_description = "Database server 01"
-      vm_cores       = 2
-      vm_memory      = 2048
-      vm_tags        = ["terraform", "Ubuntu"]
-
-      vm_disk_size    = 28
-      vm_disk_storage = "local-lvm"
-
-      base_vm_id = 104
-      node_name  = "DellCluster2"
-
-      ip_config_ipv4_address = "192.168.1.72/24"
-      ip_config_ipv4_gateway = "192.168.1.1"
+    vm_name            = "Ubuntu_Mgmt"
+      node_name          = "Ubuntu_Mgmt"
+      vm_id              = 213
+      target_node        = "pve"
+      clone_source_vm_id = 104
+      cpu_cores          = 2
+      memory_dedicated   = 2048
+      disk_size          = 28
+      ip_address         = "192.168.1.72/24"
+      ip_gateway         = "192.168.1.1"
+      tags               = ["terraform", "Ubuntu"]
     }
   }
+
+  
 }
 
 # Windows Server VMs — installed fresh from ISO with an unattended answer
@@ -146,12 +129,12 @@ variable "win_vms" {
     network_bridge  = optional(string, "vmbr0")
     network_vlan_id = optional(number)
 
-    # Datastore file ID of the install ISO, with autounattend.xml already
-    # baked into its root (see modules/WinServer_VM for why — bpg/proxmox
-    # only supports one cdrom device per VM).
-    install_iso_file_id = string
+    # Datastore file IDs, e.g. "local:iso/WindowsServer2025.iso" and
+    # "local:iso/winsrv2025-unattend.iso" — upload both to your Proxmox
+    # datastore first, then reference them here.
+    #install_iso_file_id  = string
+    unattend_iso_file_id = string
   }))
 
   default = {}
 }
-
