@@ -32,46 +32,46 @@ variable "ssh_public_key" {
 variable "vms" {
   description = "Map of VMs to clone. Key is a short logical name, value is its configuration."
   type = map(object({
-    vm_id              = number
-    vm_name           = string
-    vm_description    = string
-    vm_cores           = number
-    vm_sockets         = number
-    vm_tags            = list(string)
-    network_vlan_id    = number
-    vm_iso             = string
+    vm_id           = number
+    vm_name         = string
+    vm_description  = string
+    vm_cores        = number
+    vm_sockets      = number
+    vm_tags         = list(string)
+    network_vlan_id = number
+    vm_iso          = string
     # Network Device
-    network_model      = string
-    network_bridge     = string
+    network_model  = string
+    network_bridge = string
     # Memory
-    vm_memory          = number
+    vm_memory = number
     # Agent
-    vm_agent_enabled   = bool
+    vm_agent_enabled = bool
     # Clone
-    base_vm_id         = number
-    full_clone         = bool
-    node_name          = string
+    base_vm_id = number
+    full_clone = bool
+    node_name  = string
     # Disk
-    vm_disk_size       = number
+    vm_disk_size = number
     #vm_disk_storage    = string
     # Operating system
-    vm_os_type         = string
+    vm_os_type = string
     # Initialization settings for cloud-init
-    ci_datastore_id    = string
-    ci_dns_domain      = string
-    ci_dns_servers     = list(string)
-    ci_username        = string
-    ci_ssh_keys        = list(string)
-    ci_password        = string
+    ci_datastore_id = string
+    ci_dns_domain   = string
+    ci_dns_servers  = list(string)
+    ci_username     = string
+    ci_ssh_keys     = list(string)
+    ci_password     = string
   }))
 
   default = {
-    web-01 = {
-      vm_name            = "Ubuntu_Monitoring"  
+    Linux_Monitoring = {
+      vm_name            = "Ubuntu_Monitoring"
       node_name          = "Ubuntu_Monitoring"
       vm_id              = 211
       target_node        = "pve"
-      clone_source_vm_id = 104
+      clone_source_vm_id = 110
       cpu_cores          = 2
       memory_dedicated   = 2048
       disk_size          = 28
@@ -79,12 +79,12 @@ variable "vms" {
       ip_gateway         = "192.168.1.1"
       tags               = ["terraform", "Ubuntu"]
     }
-    web-02 = {
+    Linux_Apps = {
       vm_name            = "Ubuntu_Apps"
       node_name          = "Ubuntu_Apps"
       vm_id              = 212
       target_node        = "pve"
-      clone_source_vm_id = 104
+      clone_source_vm_id = 110
       cpu_cores          = 2
       memory_dedicated   = 2048
       disk_size          = 28
@@ -92,12 +92,12 @@ variable "vms" {
       ip_gateway         = "192.168.1.1"
       tags               = ["terraform", "Ubuntu"]
     }
-    db-01 = {
-    vm_name            = "Ubuntu_Mgmt"
+    Linus_Mgmt = {
+      vm_name            = "Ubuntu_Mgmt"
       node_name          = "Ubuntu_Mgmt"
       vm_id              = 213
       target_node        = "pve"
-      clone_source_vm_id = 104
+      clone_source_vm_id = 110
       cpu_cores          = 2
       memory_dedicated   = 2048
       disk_size          = 28
@@ -107,7 +107,7 @@ variable "vms" {
     }
   }
 
-  
+
 }
 
 # Windows Server VMs — installed fresh from ISO with an unattended answer
