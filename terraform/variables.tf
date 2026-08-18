@@ -79,7 +79,7 @@ variable "vms" {
       vm_memory      = 2048
       vm_tags        = ["terraform", "Ubuntu"]
 
-      vm_disk_size    = 28
+      vm_disk_size    = 40
       vm_disk_storage = "local-lvm"
 
       base_vm_id = 110
@@ -97,7 +97,7 @@ variable "vms" {
       vm_memory      = 2048
       vm_tags        = ["terraform", "Ubuntu"]
 
-      vm_disk_size    = 28
+      vm_disk_size    = 40
       vm_disk_storage = "local-lvm"
 
       base_vm_id = 110
@@ -115,7 +115,7 @@ variable "vms" {
       vm_memory      = 2048
       vm_tags        = ["terraform", "Ubuntu"]
 
-      vm_disk_size    = 28
+      vm_disk_size    = 40
       vm_disk_storage = "local-lvm"
 
       base_vm_id = 110
