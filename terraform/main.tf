@@ -1,73 +1,69 @@
-resource "proxmox_virtual_environment_vm" "winserver_vm" {
-  name        = var.vm_name
-  description = var.vm_description
-  tags        = var.vm_tags
-  node_name   = var.target_node
-  vm_id       = var.vm_id
+module "ubuntu_vm" {
+  source   = "./modules/Linux_VM"
+  for_each = var.vms
 
-  started = var.started
-  on_boot = var.on_boot
+  vm_name        = each.key
+  vm_description = each.value.vm_description
+  target_node    = each.value.target_node
+  vm_id          = each.value.vm_id
+  vm_cores       = each.value.vm_cores
+  vm_sockets     = each.value.vm_sockets
+  vm_tags        = each.value.vm_tags
 
-  # SATA + e1000 need no driver injection, so the installer can see the
-  # disk and NIC immediately — that's the whole reason to pick this combo
-  # over VirtIO for an unattended install.
-  bios    = "seabios"
-  machine = "pc"
+  # Disk
+  vm_disk_size    = each.value.vm_disk_size
+  vm_disk_storage = each.value.vm_disk_storage
 
-  cpu {
-    cores   = var.vm_cores
-    sockets = var.vm_sockets
-    type    = var.cpu_type
-  }
+  # Network
+  network_model   = each.value.network_model
+  network_bridge  = each.value.network_bridge
+  network_vlan_id = each.value.network_vlan_id
 
-  memory {
-    dedicated = var.vm_memory
-  }
+  # Memory
+  vm_memory = each.value.vm_memory
 
-  agent {
-    enabled = var.vm_agent_enabled
-  }
+  # Agent / OS
+  vm_agent_enabled = true
+  vm_os_type       = "l26"
 
-  operating_system {
-    type = var.vm_os_type
-  }
+  # Clone
+  base_vm_id = each.value.base_vm_id
+  node_name  = each.value.node_name
+  full_clone = each.value.full_clone
 
-  disk {
-    interface    = var.disk_interface
-    size         = var.vm_disk_size
-    datastore_id = var.vm_disk_storage
-    ssd          = true
-  }
+  # Initialization / cloud-init
+  ci_datastore_id = each.value.ci_datastore_id
+  ci_dns_domain   = each.value.ci_dns_domain
+  ci_dns_servers  = each.value.ci_dns_servers
+  ci_username     = coalesce(each.value.ci_username, "ubuntu")
+  ci_ssh_keys     = length(each.value.ci_ssh_keys) > 0 ? each.value.ci_ssh_keys : [file(var.ssh_public_key)]
+  ci_password     = each.value.ci_password
 
-  network_device {
-    bridge  = var.network_bridge
-    model   = var.network_model
-    vlan_id = var.network_vlan_id
-  }
+  ip_config_ipv4_address = each.value.ip_config_ipv4_address
+  ip_config_ipv4_gateway = each.value.ip_config_ipv4_gateway
 
-  # bpg/proxmox only allows a single "cdrom" block per VM (see
-  # https://github.com/bpg/terraform-provider-proxmox/issues/718), so the
-  # answer file has to be baked into this ISO ahead of time rather than
-  # attached as a second CD-ROM. install_iso_file_id should point at a
-  # Windows install ISO that already has autounattend.xml at its root
-  # (rebuilt with oscdimg — see module README).
-  cdrom {
-    file_id   = var.install_iso_file_id
-    interface = "ide2"
-  }
+  timeout_clone = each.value.timeout_clone
+}
 
-  boot_order = var.boot_order
+module "winserver_vm" {
+  source   = "./modules/WinServer_VM"
+  for_each = var.win_vms
 
-  timeouts {
-    create = "${var.timeout_create}s"
-  }
+  vm_name        = each.key
+  vm_description = each.value.vm_description
+  target_node    = each.value.target_node
+  vm_id          = each.value.vm_id
+  vm_cores       = each.value.vm_cores
+  vm_sockets     = each.value.vm_sockets
+  vm_tags        = each.value.vm_tags
+  vm_memory      = each.value.vm_memory
 
-  lifecycle {
-    ignore_changes = [
-      # Once installed, don't let Terraform keep re-attaching/ejecting
-      # install media on every plan.
-      cdrom,
-    ]
-  }
+  vm_disk_size    = each.value.vm_disk_size
+  vm_disk_storage = each.value.vm_disk_storage
+
+  network_bridge  = each.value.network_bridge
+  network_vlan_id = each.value.network_vlan_id
+
+  install_iso_file_id = each.value.install_iso_file_id
 }
 

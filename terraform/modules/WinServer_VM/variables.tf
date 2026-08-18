@@ -121,9 +121,9 @@ variable "install_iso_file_id" {
 }
 
 variable "boot_order" {
-  description = "Boot device order. Defaults to CD-ROM (install media) first, then disk, so subsequent reboots after install correctly boot from disk."
+  description = "Boot device order. Disk first, CD-ROM second: on first boot the disk is empty (no boot record), so BIOS falls through to the CD-ROM and Setup starts normally. Once Setup writes a boot record to disk (early in install, before the first reboot), every later boot goes straight to disk instead of re-launching the installer — CD-first here causes an infinite reinstall loop."
   type        = list(string)
-  default     = ["ide2", "sata0"]
+  default     = ["sata0", "ide2"]
 }
 
 variable "timeout_create" {
